@@ -1,8 +1,12 @@
-package net.guizhanss.guizhanslimefunaddon;
+package net.guizhanss.slimefunextension;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.logging.Level;
+
+import net.guizhanss.guizhanlib.slimefun.addon.AddonConfig;
+import net.guizhanss.slimefunextension.registration.ModuleLoader;
 
 import org.bukkit.plugin.Plugin;
 
@@ -10,21 +14,46 @@ import io.github.thebusybiscuit.slimefun4.libraries.dough.updater.GitHubBuildsUp
 
 import net.guizhanss.guizhanlib.slimefun.addon.AbstractAddon;
 import net.guizhanss.guizhanlib.updater.GuizhanBuildsUpdater;
+import net.guizhanss.slimefunextension.utils.FileUtils;
 
 import org.bstats.bukkit.Metrics;
 
-public final class GuizhanSlimefunAddon extends AbstractAddon {
+public final class SlimefunExtension extends AbstractAddon {
 
-    public GuizhanSlimefunAddon() {
-        super("ybw0014", "GuizhanSlimefunAddon", "master", "auto-update");
+    private AddonConfig config;
+
+    public SlimefunExtension() {
+        super("ybw0014", "SlimefunExtension", "master", "auto-update");
     }
 
     @Override
     public void enable() {
         log(Level.INFO, "====================");
-        log(Level.INFO, "GuizhanSlimefunAddon");
+        log(Level.INFO, " Slimefun Extension ");
         log(Level.INFO, "     by ybw0014     ");
         log(Level.INFO, "====================");
+
+        // create folders
+        File moduleFolder = new File(getDataFolder(), "modules");
+        if (!moduleFolder.exists()) {
+            moduleFolder.mkdirs();
+        }
+
+        // load config
+        config = new AddonConfig(this, "config.yml");
+        config.addMissingKeys();
+
+        // register modules
+        List<String> modules = FileUtils.getFolders(moduleFolder).stream()
+            .sorted(FileUtils.COMPARATOR)
+            .filter(folder -> !folder.startsWith("_"))
+            .toList();
+
+        for (String module : modules) {
+            ModuleLoader.loadModule(new File(moduleFolder, module), module);
+        }
+
+        setupMetrics();
     }
 
     @Override

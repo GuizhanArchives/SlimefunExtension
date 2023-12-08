@@ -1,7 +1,7 @@
-name: GuizhanSlimefunAddon
+name: SlimefunExtension
 version: '${project.version}'
-main: net.guizhanss.guizhanslimefunaddon.GuizhanSlimefunAddon
-api-version: 1.14
+main: net.guizhanss.slimefunextension.SlimefunExtension
+api-version: 1.16
 depend: [ Slimefun ]
 softdepend: [ GuizhanLibPlugin ]
 authors: [ ybw0014 ]
