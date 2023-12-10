@@ -45,11 +45,15 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.bstats</pattern>
-                                    <shadedPattern>net.guizhanss.slimefunextension.bstats</shadedPattern>
+                                    <shadedPattern>net.guizhanss.slimefunextension.libs.bstats</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>net.guizhanss.guizhanlib</pattern>
-                                    <shadedPattern>net.guizhanss.slimefunextension.guizhanlib</shadedPattern>
+                                    <shadedPattern>net.guizhanss.slimefunextension.libs.guizhanlib</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>net.kyori.adventure</pattern>
+                                    <shadedPattern>net.guizhanss.slimefunextension.libs.adventure</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -62,7 +66,9 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>*</include>
+                    <include>*.yml</include>
+                    <include>example/*.yml</include>
+                    <include>lang/*.yml</include>
                 </includes>
             </resource>
         </resources>
@@ -122,6 +128,20 @@
             <groupId>net.guizhanss</groupId>
             <artifactId>GuizhanLib-api</artifactId>
             <version>1.6.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.14.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.14.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

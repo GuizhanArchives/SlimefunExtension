@@ -5,25 +5,66 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.logging.Level;
 
-import net.guizhanss.guizhanlib.slimefun.addon.AddonConfig;
-import net.guizhanss.slimefunextension.registration.ModuleLoader;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import com.google.common.base.Preconditions;
 
 import org.bukkit.plugin.Plugin;
 
 import io.github.thebusybiscuit.slimefun4.libraries.dough.updater.GitHubBuildsUpdater;
 
 import net.guizhanss.guizhanlib.slimefun.addon.AbstractAddon;
+import net.guizhanss.guizhanlib.slimefun.addon.AddonConfig;
 import net.guizhanss.guizhanlib.updater.GuizhanBuildsUpdater;
+import net.guizhanss.slimefunextension.core.registration.ERegistry;
+import net.guizhanss.slimefunextension.core.registration.ModuleLoader;
+import net.guizhanss.slimefunextension.core.services.LocalizationService;
 import net.guizhanss.slimefunextension.utils.FileUtils;
 
 import org.bstats.bukkit.Metrics;
 
 public final class SlimefunExtension extends AbstractAddon {
 
+    private static final String DEFAULT_LANG = "en-US";
+
+    private LocalizationService localization;
+    private boolean debugEnabled = false;
     private AddonConfig config;
+    private ERegistry registry;
 
     public SlimefunExtension() {
         super("ybw0014", "SlimefunExtension", "master", "auto-update");
+    }
+
+    @Nonnull
+    public static LocalizationService getLocalization() {
+        return inst().localization;
+    }
+
+    @Nonnull
+    public static ERegistry getRegistry() {
+        return inst().registry;
+    }
+
+    @ParametersAreNonnullByDefault
+    public static void logKeyed(Level level, String key, Object... args) {
+        Preconditions.checkNotNull(key, "key cannot be null");
+
+        log(level, inst().localization.getString(key), args);
+    }
+
+    public static void debug(@Nonnull String message, @Nonnull Object... args) {
+        Preconditions.checkNotNull(message, "message cannot be null");
+
+        if (inst().debugEnabled) {
+            inst().getLogger().log(Level.INFO, "[DEBUG] " + message, args);
+        }
+    }
+
+    @Nonnull
+    private static SlimefunExtension inst() {
+        return getInstance();
     }
 
     @Override
@@ -39,18 +80,33 @@ public final class SlimefunExtension extends AbstractAddon {
             moduleFolder.mkdirs();
         }
 
-        // load config
+        // registry
+        registry = new ERegistry(this);
+
+        // config
         config = new AddonConfig(this, "config.yml");
         config.addMissingKeys();
 
-        // register modules
+        // debug
+        debugEnabled = config.getBoolean("debug", false);
+
+        // localization
+        log(Level.INFO, "Loading language...");
+        String lang = config.getString("lang", DEFAULT_LANG);
+        localization = new LocalizationService(this);
+        localization.addLanguage(lang);
+        if (!lang.equals(DEFAULT_LANG)) {
+            localization.addLanguage(DEFAULT_LANG);
+        }
+        logKeyed(Level.INFO, "console.loaded-language", lang);
+
+        // modules
         List<String> modules = FileUtils.getFolders(moduleFolder).stream()
             .sorted(FileUtils.COMPARATOR)
-            .filter(folder -> !folder.startsWith("_"))
+            .filter(folder -> !folder.startsWith("_") && !folder.startsWith("."))
             .toList();
-
         for (String module : modules) {
-            ModuleLoader.loadModule(new File(moduleFolder, module), module);
+            ModuleLoader.load(new File(moduleFolder, module), module);
         }
 
         setupMetrics();

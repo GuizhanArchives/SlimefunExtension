@@ -1,0 +1,6 @@
+console:
+  loaded-language: "Loaded language: {0}"
+  loading-module: "Loading module {0}"
+
+item-types:
+  mob-drop: "<yellow>Mob Drop"
